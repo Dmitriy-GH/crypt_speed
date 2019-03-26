@@ -49,7 +49,7 @@ void fill_speed(int block_size, int block_count) {
 	int time = clock() - start;
 	if (time == 0) time = 1;
 	int64_t total = (int64_t)block_size * block_count;
-	printf("filled %d Mb in %d ms %d Mb/s   \n%u\r", (int)(total >> 20), time, (int)((total * 1000 / time) >> 20), cs);
+	printf("filled %d Mb in %d ms %d Mb/s   \n%u\r", (int)(total >> 20), time, (int)((total * CLOCKS_PER_SEC / time) >> 20), cs);
 	time_fill = time;
 }
 
