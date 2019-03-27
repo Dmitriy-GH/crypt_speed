@@ -56,12 +56,15 @@ void fill_speed(int block_size, int block_count) {
 // Замер скорости cbc
 void cbc_speed(int block_size, int block_count) {
 	uint8_t *key = new uint8_t[block_size]; // Ключ шифрования размером с блок
-	fill_data(0, 0, 54321);
-	fill_data(key, block_size); // генерация ключа
+	// генерация ключа
+	rc4_t rc4("My secret key", 13);
+	memset(key, 0, block_size);
+	rc4.crypt(key, block_size); 
+
 	uint8_t *buf = new uint8_t[block_size]; // буфер под данные
 	fill_data(0, 0, 12345); // Инициализация генератора данных
 	int cs = 0;
-	printf("test speed cbc encrypt %d blocks of %d bytes each ... \n", block_size, block_count);
+	printf("test speed CBC XOR encrypt %d blocks of %d bytes each ... \n", block_size, block_count);
 	uint32_t start = clock(); // Начало замера
 	for (int i = 0; i < block_count; i++) {
 		fill_data(buf, block_size);
