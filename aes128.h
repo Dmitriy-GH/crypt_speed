@@ -141,7 +141,8 @@ public:
 		__m128i *end = ((__m128i *)buffer) + size / 16;
 		__m128i prev = { 0 };
 		for (__m128i *p = (__m128i *)buffer; p < end; p++) {
-			aes128_enc(key_schedule, &_mm_xor_si128(*p, prev), p);
+			__m128i v = _mm_xor_si128(*p, prev);
+			aes128_enc(key_schedule, &v, p);
 			prev = *p;
 		}
 	}
