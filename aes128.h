@@ -134,6 +134,18 @@ public:
 			aes128_dec(key_schedule, p, p);
 		}
 	}
+
+	// Шифрование блока размером кратно 16 байт
+	void cbc_encrypt(void *buffer, size_t size) {
+		assert((size % 16) == 0); // Размер должен быть кратен 16
+		__m128i *end = ((__m128i *)buffer) + size / 16;
+		__m128i prev = { 0 };
+		for (__m128i *p = (__m128i *)buffer; p < end; p++) {
+			aes128_enc(key_schedule, &_mm_xor_si128(*p, prev), p);
+			prev = *p;
+		}
+	}
+
 };
 
 #ifdef _DEBUG
