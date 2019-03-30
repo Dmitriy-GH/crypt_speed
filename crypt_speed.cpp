@@ -39,7 +39,7 @@ void fill_speed(int block_size, int block_count) {
 	uint8_t *buf = new uint8_t[block_size]; // буфер под данные
 	fill_data(0, 0, 12345); // Инициализация генератора данных
 	int cs = 0;
-	printf("test speed fill %d blocks of %d bytes each ... \n", block_size, block_count);
+	printf("test speed fill %d blocks of %d bytes each ... \n", block_count, block_size);
 	uint32_t start = clock(); // Начало замера
 	for (int i = 0; i < block_count; i++) {
 		fill_data(buf, block_size);
@@ -64,7 +64,7 @@ void cbc_speed(int block_size, int block_count) {
 	uint8_t *buf = new uint8_t[block_size]; // буфер под данные
 	fill_data(0, 0, 12345); // Инициализация генератора данных
 	int cs = 0;
-	printf("test speed CBC XOR encrypt %d blocks of %d bytes each ... \n", block_size, block_count);
+	printf("test speed CBC XOR encrypt %d blocks of %d bytes each ... \n", block_count, block_size);
 	uint32_t start = clock(); // Начало замера
 	for (int i = 0; i < block_count; i++) {
 		fill_data(buf, block_size);
@@ -84,7 +84,7 @@ void rc4_speed(int block_size, int block_count) {
 	uint8_t *buf = new uint8_t[block_size]; // буфер под данные
 	fill_data(0, 0, 12345); // Инициализация генератора данных
 	int cs = 0;
-	printf("test speed RC4 encrypt %d blocks of %d bytes each ... \n", block_size, block_count);
+	printf("test speed RC4 encrypt %d blocks of %d bytes each ... \n", block_count, block_size);
 	uint32_t start = clock(); // Начало замера
 	for (int i = 0; i < block_count; i++) {
 		fill_data(buf, block_size);
@@ -105,7 +105,7 @@ void aes_speed(int block_size, int block_count) {
 	uint8_t *buf = new uint8_t[block_size]; // буфер под данные
 	fill_data(0, 0, 12345); // Инициализация генератора данных
 	int cs = 0;
-	printf("test speed AES-128 encrypt %d blocks of %d bytes each ... \n", block_size, block_count);
+	printf("test speed AES-128 encrypt %d blocks of %d bytes each ... \n", block_count, block_size);
 	uint32_t start = clock(); // Начало замера
 	for (int i = 0; i < block_count; i++) {
 		fill_data(buf, block_size);
@@ -126,7 +126,7 @@ void aes_cbc_speed(int block_size, int block_count) {
 	uint8_t *buf = new uint8_t[block_size]; // буфер под данные
 	fill_data(0, 0, 12345); // Инициализация генератора данных
 	int cs = 0;
-	printf("test speed AES-128 + CBC encrypt %d blocks of %d bytes each ... \n", block_size, block_count);
+	printf("test speed AES-128 + CBC encrypt %d blocks of %d bytes each ... \n", block_count, block_size);
 	uint32_t start = clock(); // Начало замера
 	for (int i = 0; i < block_count; i++) {
 		fill_data(buf, block_size);
