@@ -177,6 +177,13 @@ public:
 		}
 	}
 
+	void xor_crypt(void* buf, size_t size) {
+		assert((size % 16) == 0); // Размер должен быть кратен 16
+		__m128i *end = ((__m128i *)buf) + size/16;
+		for (__m128i *p = ((__m128i *)buf) + 1; p < end; p++) {
+			*p = _mm_xor_si128(*p, *(p - 1));
+		}
+	}
 };
 
 #ifdef _DEBUG
