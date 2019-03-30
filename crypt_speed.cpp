@@ -49,7 +49,7 @@ void fill_speed(int block_size, int block_count) {
 	int time = clock() - start;
 	if (time == 0) time = 1;
 	int64_t total = (int64_t)block_size * block_count;
-	printf("filled %d Mb in %d ms %d Mb/s   \n%u\r", (int)(total >> 20), time, (int)((total * CLOCKS_PER_SEC / time) >> 20), cs);
+	printf("filled %d Mb in %d ms %d Mb/s   \n%u\r", (int)(total >> 20), time * 1000 / CLOCKS_PER_SEC, (int)((total * CLOCKS_PER_SEC / time) >> 20), cs);
 	time_fill = time;
 }
 
@@ -75,7 +75,7 @@ void cbc_speed(int block_size, int block_count) {
 	int time = clock() - start - time_fill;
 	if (time == 0) time = 1;
 	int64_t total = (int64_t)block_size * block_count;
-	printf("%d ms %d Mb/s\n%u\r", time, (int)((total * CLOCKS_PER_SEC / time) >> 20), cs);
+	printf("%d ms %d Mb/s\n%u\r", time * 1000 / CLOCKS_PER_SEC, (int)((total * CLOCKS_PER_SEC / time) >> 20), cs);
 }
 
 // Замер скорости RC4
@@ -95,7 +95,7 @@ void rc4_speed(int block_size, int block_count) {
 	int time = clock() - start - time_fill;
 	if (time == 0) time = 1;
 	int64_t total = (int64_t)block_size * block_count;
-	printf("%d ms %d Mb/s\n%u\r", time, (int)((total * CLOCKS_PER_SEC / time) >> 20), cs);
+	printf("%d ms %d Mb/s\n%u\r", time * 1000 / CLOCKS_PER_SEC, (int)((total * CLOCKS_PER_SEC / time) >> 20), cs);
 }
 
 // Замер скорости AES-128
@@ -116,7 +116,7 @@ void aes_speed(int block_size, int block_count) {
 	int time = clock() - start - time_fill;
 	if (time == 0) time = 1;
 	int64_t total = (int64_t)block_size * block_count;
-	printf("%d ms %d Mb/s\n%u\r", time, (int)((total * CLOCKS_PER_SEC / time) >> 20), cs);
+	printf("%d ms %d Mb/s\n%u\r", time * 1000 / CLOCKS_PER_SEC, (int)((total * CLOCKS_PER_SEC / time) >> 20), cs);
 }
 
 // Замер скорости AES-128 + CBC
@@ -137,7 +137,7 @@ void aes_cbc_speed(int block_size, int block_count) {
 	int time = clock() - start - time_fill;
 	if (time == 0) time = 1;
 	int64_t total = (int64_t)block_size * block_count;
-	printf("%d ms %d Mb/s\n%u\r", time, (int)((total * CLOCKS_PER_SEC / time) >> 20), cs);
+	printf("%d ms %d Mb/s\n%u\r", time * 1000 / CLOCKS_PER_SEC, (int)((total * CLOCKS_PER_SEC / time) >> 20), cs);
 }
 
 int main()
