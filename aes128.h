@@ -8,6 +8,8 @@
 #include <assert.h>
 #if defined(_MSC_VER)
 #include <intrin.h> // __cpuid()
+#else
+#include <cpuid.h>
 #endif
 //compile using gcc and following arguments: -g;-O0;-Wall;-msse2;-msse;-march=native;-maes
 
