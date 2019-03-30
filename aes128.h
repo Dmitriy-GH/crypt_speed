@@ -177,6 +177,7 @@ public:
 		}
 	}
 
+	// Шифрование данных XOR с предыдущим
 	void xor_crypt(void* buf, size_t size) {
 		assert((size % 16) == 0); // Размер должен быть кратен 16
 		__m128i *end = ((__m128i *)buf) + size/16;
