@@ -153,6 +153,10 @@ int main()
 	fill_speed(size, count);
 	cbc_speed(size, count);
 	rc4_speed(size, count);
-	aes_speed(size, count);
-	aes_cbc_speed(size, count);
+	if (aes128_is_supported()) {
+		aes_speed(size, count);
+		aes_cbc_speed(size, count);
+	} else {
+		printf("CPU not surropted AES\n");
+	}
 }

@@ -6,6 +6,9 @@
 #include <string.h>     //for memcmp
 #include <wmmintrin.h>  //for intrinsics for AES-NI
 #include <assert.h>
+#if defined(_MSC_VER)
+#include <intrin.h> // __cpuid()
+#endif
 //compile using gcc and following arguments: -g;-O0;-Wall;-msse2;-msse;-march=native;-maes
 
 //internal stuff
@@ -96,6 +99,18 @@ static void aes128_dec(__m128i *key_schedule, void *cipherText, void *plainText)
 	aes128_dec(key_schedule, (__m128i *) cipherText, (__m128i *) plainText);
 }
 
+// Провевка поддержки AES процессором
+static bool aes128_is_supported() {
+	#if defined(_MSC_VER)
+		int info[4];
+		__cpuid(info, 0x01);
+		return (info[2] & 0x2000000) != 0;
+	#else
+		unsigned int eax, ebx, ecx, edx;
+		__get_cpuid(0x01, &eax, &ebx, &ecx, &edx);
+		return (ecx & 0x2000000) != 0;
+	#endif
+}
 //*****************************************************************************************
 //*****************************************************************************************
 //*****************************************************************************************
