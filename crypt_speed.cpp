@@ -98,6 +98,29 @@ void rc4_speed(int block_size, int block_count) {
 	printf("%d ms %d Mb/s\n%u\r", time / ((int)CLOCKS_PER_SEC / 1000), (int)((total * CLOCKS_PER_SEC / time) >> 20), cs);
 }
 
+// Замер скорости RC4 xor
+void rc4rand256_speed(int block_size, int block_count) {
+	rc4_t rc4("My secret key", 13);
+	uint8_t *buf = new uint8_t[block_size]; // буфер под данные
+	uint8_t *key = new uint8_t[block_size + 256]; 
+	rc4.crypt(key, block_size + 256);
+	fill_data(0, 0, 12345); // Инициализация генератора данных
+	int cs = 0;
+	printf("test speed RC4rand256 encrypt %d blocks of %d bytes each ... \n", block_count, block_size);
+	uint32_t start = clock(); // Начало замера
+	for (int i = 0; i < block_count; i++) {
+		fill_data(buf, block_size);
+		uint8_t *k = key + buf[0];
+		for (size_t i = 0; i != block_size; i++) buf[i] ^= k[i];
+		cs += checksum(buf, block_size); // Расчет контрольной суммы чтобы оптимизатор ничего не убрал
+	}
+	// Вывод результата
+	int time = clock() - start - time_fill;
+	if (time == 0) time = 1;
+	int64_t total = (int64_t)block_size * block_count;
+	printf("%d ms %d Mb/s\n%u\r", time / ((int)CLOCKS_PER_SEC / 1000), (int)((total * CLOCKS_PER_SEC / time) >> 20), cs);
+}
+
 // Замер скорости AES-128
 void aes_speed(int block_size, int block_count) {
 	aes128ni_t aes("My secret key");
@@ -235,11 +258,12 @@ int main()
 	fill_speed(size, count);
 	cbc_speed(size, count);
 	rc4_speed(size, count);
+	rc4rand256_speed(size, count);
 	if (aes128ni_is_supported()) {
 		aes_speed(size, count);
 		aes_speed2(size, count);
-		aes_cbc_speed(size, count);
-		aes_cbc_speed2(size, count);
+		//aes_cbc_speed(size, count);
+		//aes_cbc_speed2(size, count);
 		aes_xor_speed(size, count);
 		aes_xor_speed2(size, count);
 	} else {
