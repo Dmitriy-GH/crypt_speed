@@ -117,15 +117,11 @@ static bool aes128_is_supported() {
 //*****************************************************************************************
 //*****************************************************************************************
 
-class aes128_t {
+class aes128ni_t {
 	__m128i key_schedule[20];
 
 public:
-	aes128_t(const uint8_t* key) {
-		init(key);
-	}
-
-	aes128_t(const char* key) {
+	aes128ni_t(const void* key) {
 		init((const uint8_t*)key);
 	}
 
@@ -178,11 +174,25 @@ public:
 	}
 
 	// Шифрование данных XOR с предыдущим
-	void xor_crypt(void* buf, size_t size) {
+	void xor_encrypt(void* buf, size_t size) {
 		assert((size % 16) == 0); // Размер должен быть кратен 16
-		__m128i *end = ((__m128i *)buf) + size/16;
-		for (__m128i *p = ((__m128i *)buf) + 1; p < end; p++) {
-			*p = _mm_xor_si128(*p, *(p - 1));
+		__m128i prev = {0}, *end = ((__m128i *)buf) + size / 16;
+		for (__m128i *p = (__m128i *)buf; p < end; p++) {
+			prev = _mm_xor_si128(*p, prev);
+			*p = prev;
+		}
+		encrypt(buf, size);
+	}
+
+	// Расшифровка данных XOR с предыдущим
+	void xor_decrypt(void* buf, size_t size) {
+		decrypt(buf, size);
+		assert((size % 16) == 0); // Размер должен быть кратен 16
+		__m128i prev = { 0 }, *end = ((__m128i *)buf) + size / 16;
+		for (__m128i *p = (__m128i *)buf; p < end; p++) {
+			__m128i b = *p;
+			prev = _mm_xor_si128(*p, prev);
+			prev = b;
 		}
 	}
 };
@@ -190,12 +200,12 @@ public:
 #ifdef _DEBUG
 #include <stdio.h>
 
-static void aes128_t_test() {
+static void aes128ni_t_test() {
 	uint8_t plain[] = { 0x32, 0x43, 0xf6, 0xa8, 0x88, 0x5a, 0x30, 0x8d, 0x31, 0x31, 0x98, 0xa2, 0xe0, 0x37, 0x07, 0x34 };
 	uint8_t enc_key[] = { 0x2b, 0x7e, 0x15, 0x16, 0x28, 0xae, 0xd2, 0xa6, 0xab, 0xf7, 0x15, 0x88, 0x09, 0xcf, 0x4f, 0x3c };
 	uint8_t cipher[] = { 0x39, 0x25, 0x84, 0x1d, 0x02, 0xdc, 0x09, 0xfb, 0xdc, 0x11, 0x85, 0x97, 0x19, 0x6a, 0x0b, 0x32 };
 
-	aes128_t aes(enc_key);
+	aes128ni_t aes(enc_key);
 	uint8_t buf[16];
 	memcpy(buf, plain, 16);
 	aes.encrypt(buf, 16);

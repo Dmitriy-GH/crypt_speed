@@ -6,7 +6,7 @@
 
 #include "cbc.h"
 #include "rc4.h"
-#include "aes128.h"
+#include "aes128ni.h"
 
 int time_fill = 0; // Время на заполнение, мс
 
@@ -100,7 +100,7 @@ void rc4_speed(int block_size, int block_count) {
 
 // Замер скорости AES-128
 void aes_speed(int block_size, int block_count) {
-	aes128_t aes("My secret key");
+	aes128ni_t aes("My secret key");
 
 	uint8_t *buf = new uint8_t[block_size]; // буфер под данные
 	fill_data(0, 0, 12345); // Инициализация генератора данных
@@ -120,7 +120,7 @@ void aes_speed(int block_size, int block_count) {
 }
 
 void aes_speed2(int block_size, int block_count) {
-	aes128_t aes("My secret key");
+	aes128ni_t aes("My secret key");
 
 	uint8_t *buf = new uint8_t[block_size]; // буфер под данные
 	fill_data(0, 0, 12345); // Инициализация генератора данных
@@ -141,7 +141,7 @@ void aes_speed2(int block_size, int block_count) {
 
 // Замер скорости AES-128 + CBC
 void aes_cbc_speed(int block_size, int block_count) {
-	aes128_t aes("My secret key");
+	aes128ni_t aes("My secret key");
 
 	uint8_t *buf = new uint8_t[block_size]; // буфер под данные
 	fill_data(0, 0, 12345); // Инициализация генератора данных
@@ -161,7 +161,7 @@ void aes_cbc_speed(int block_size, int block_count) {
 }
 
 void aes_cbc_speed2(int block_size, int block_count) {
-	aes128_t aes("My secret key");
+	aes128ni_t aes("My secret key");
 
 	uint8_t *buf = new uint8_t[block_size]; // буфер под данные
 	fill_data(0, 0, 12345); // Инициализация генератора данных
@@ -180,17 +180,9 @@ void aes_cbc_speed2(int block_size, int block_count) {
 	printf("%d ms %d Mb/s\n%u\r", time / ((int)CLOCKS_PER_SEC / 1000), (int)((total * CLOCKS_PER_SEC / time) >> 20), cs);
 }
 
-// Шифрование xor самим c собой
-void xor_crypt(void* buf, size_t size) {
-	uint8_t *end = ((uint8_t *)buf) + size;
-	for (uint8_t *p = ((uint8_t *)buf) + 1; p < end; p++) {
-		*p ^= *(p - 1);
-	}
-}
-
 // Замер скорости AES-128 + XOR
 void aes_xor_speed(int block_size, int block_count) {
-	aes128_t aes("My secret key");
+	aes128ni_t aes("My secret key");
 
 	uint8_t *buf = new uint8_t[block_size]; // буфер под данные
 	fill_data(0, 0, 12345); // Инициализация генератора данных
@@ -199,8 +191,7 @@ void aes_xor_speed(int block_size, int block_count) {
 	uint32_t start = clock(); // Начало замера
 	for (int i = 0; i < block_count; i++) {
 		fill_data(buf, block_size);
-		aes.xor_crypt(buf, block_size);
-		aes.encrypt(buf, block_size);
+		aes.xor_encrypt(buf, block_size);
 		cs += checksum(buf, block_size); // Расчет контрольной суммы чтобы оптимизатор ничего не убрал
 	}
 	// Вывод результата
@@ -212,7 +203,7 @@ void aes_xor_speed(int block_size, int block_count) {
 
 // Замер скорости AES-128 + XOR
 void aes_xor_speed2(int block_size, int block_count) {
-	aes128_t aes("My secret key");
+	aes128ni_t aes("My secret key");
 
 	uint8_t *buf = new uint8_t[block_size]; // буфер под данные
 	fill_data(0, 0, 12345); // Инициализация генератора данных
@@ -221,8 +212,7 @@ void aes_xor_speed2(int block_size, int block_count) {
 	uint32_t start = clock(); // Начало замера
 	for (int i = 0; i < block_count; i++) {
 		fill_data(buf, block_size);
-		aes.xor_crypt(buf, block_size);
-		aes.decrypt(buf, block_size);
+		aes.xor_decrypt(buf, block_size);
 		cs += checksum(buf, block_size); // Расчет контрольной суммы чтобы оптимизатор ничего не убрал
 	}
 	// Вывод результата
@@ -237,10 +227,10 @@ int main()
 	printf("compile %s %s\n", __DATE__, __TIME__);
 
 #ifdef _DEBUG
-	aes128_t_test();
+	aes128ni_t_test();
 	int size = 4096, count = 5000;
 #else
-	int size = 4096, count = 300000;
+	int size = 1472, count = 500000;
 #endif
 	fill_speed(size, count);
 	cbc_speed(size, count);
