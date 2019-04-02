@@ -235,7 +235,7 @@ int main()
 	fill_speed(size, count);
 	cbc_speed(size, count);
 	rc4_speed(size, count);
-	if (aes128_is_supported()) {
+	if (aes128ni_is_supported()) {
 		aes_speed(size, count);
 		aes_speed2(size, count);
 		aes_cbc_speed(size, count);

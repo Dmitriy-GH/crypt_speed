@@ -26,7 +26,7 @@ static __m128i aes_128_key_expansion(__m128i key, __m128i keygened) {
 }
 
 //public API
-static void aes128_load_key_enc_only(const void *enc_key, __m128i *key_schedule) {
+static void aes128ni_load_key_enc_only(const void *enc_key, __m128i *key_schedule) {
 	key_schedule[0] = _mm_loadu_si128((const __m128i*) enc_key);
 	key_schedule[1] = AES_128_key_exp(key_schedule[0], 0x01);
 	key_schedule[2] = AES_128_key_exp(key_schedule[1], 0x02);
@@ -40,8 +40,8 @@ static void aes128_load_key_enc_only(const void *enc_key, __m128i *key_schedule)
 	key_schedule[10] = AES_128_key_exp(key_schedule[9], 0x36);
 }
 
-static void aes128_load_key(const void *enc_key, __m128i *key_schedule) {
-	aes128_load_key_enc_only(enc_key, key_schedule);
+static void aes128ni_load_key(const void *enc_key, __m128i *key_schedule) {
+	aes128ni_load_key_enc_only(enc_key, key_schedule);
 
 	// generate decryption keys in reverse order.
 	// k[10] is shared by last encryption and first decryption rounds
@@ -58,7 +58,7 @@ static void aes128_load_key(const void *enc_key, __m128i *key_schedule) {
 	key_schedule[19] = _mm_aesimc_si128(key_schedule[1]);
 }
 
-static void aes128_enc(__m128i *key_schedule, __m128i *plainText, __m128i *cipherText) {
+static void aes128ni_enc(__m128i *key_schedule, __m128i *plainText, __m128i *cipherText) {
 	__m128i m = _mm_loadu_si128(plainText);
 
 	m = _mm_xor_si128(m, key_schedule[0]);
@@ -75,11 +75,11 @@ static void aes128_enc(__m128i *key_schedule, __m128i *plainText, __m128i *ciphe
 	_mm_storeu_si128(cipherText, m);
 }
 
-static void aes128_enc(__m128i *key_schedule, void *plainText, void *cipherText) {
-	aes128_enc(key_schedule, (__m128i *)plainText, (__m128i *)cipherText);
+static void aes128ni_enc(__m128i *key_schedule, void *plainText, void *cipherText) {
+	aes128ni_enc(key_schedule, (__m128i *)plainText, (__m128i *)cipherText);
 }
 
-static void aes128_dec(__m128i *key_schedule, __m128i *cipherText, __m128i *plainText) {
+static void aes128ni_dec(__m128i *key_schedule, __m128i *cipherText, __m128i *plainText) {
 	__m128i m = _mm_loadu_si128(cipherText);
 
 	m = _mm_xor_si128(m, key_schedule[10 + 0]);
@@ -97,12 +97,12 @@ static void aes128_dec(__m128i *key_schedule, __m128i *cipherText, __m128i *plai
 	_mm_storeu_si128(plainText, m);
 }
 
-static void aes128_dec(__m128i *key_schedule, void *cipherText, void *plainText) {
-	aes128_dec(key_schedule, (__m128i *) cipherText, (__m128i *) plainText);
+static void aes128ni_dec(__m128i *key_schedule, void *cipherText, void *plainText) {
+	aes128ni_dec(key_schedule, (__m128i *) cipherText, (__m128i *) plainText);
 }
 
 // Провевка поддержки AES процессором
-static bool aes128_is_supported() {
+static bool aes128ni_is_supported() {
 	#if defined(_MSC_VER)
 		int info[4];
 		__cpuid(info, 0x01);
@@ -127,7 +127,7 @@ public:
 
 	// Инициализация ключа
 	void init(const uint8_t* key) {
-		aes128_load_key(key, key_schedule);
+		aes128ni_load_key(key, key_schedule);
 	}
 
 	// Шифрование блока размером кратно 16 байт
@@ -135,7 +135,7 @@ public:
 		assert((size % 16) == 0); // Размер должен быть кратен 16
 		__m128i *end = ((__m128i *)buffer) + size / 16;
 		for (__m128i *p = (__m128i *)buffer; p < end; p++) {
-			aes128_enc(key_schedule, p, p);
+			aes128ni_enc(key_schedule, p, p);
 		}
 	}
 
@@ -144,7 +144,7 @@ public:
 		assert((size % 16) == 0); // Размер должен быть кратен 16
 		__m128i *end = ((__m128i *)buffer) + size/16;
 		for (__m128i *p = (__m128i *)buffer; p < end; p++) {
-			aes128_dec(key_schedule, p, p);
+			aes128ni_dec(key_schedule, p, p);
 		}
 	}
 
@@ -155,7 +155,7 @@ public:
 		__m128i prev = { 0 };
 		for (__m128i *p = (__m128i *)buffer; p < end; p++) {
 			__m128i v = _mm_xor_si128(*p, prev);
-			aes128_enc(key_schedule, &v, p);
+			aes128ni_enc(key_schedule, &v, p);
 			prev = *p;
 		}
 	}
@@ -167,7 +167,7 @@ public:
 		__m128i prev = { 0 };
 		for (__m128i *p = (__m128i *)buffer; p < end; p++) {
 			__m128i v, b = *p;
-			aes128_dec(key_schedule, p, &v);
+			aes128ni_dec(key_schedule, p, &v);
 			*p = _mm_xor_si128(v, prev);
 			prev = b;
 		}
