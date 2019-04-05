@@ -121,12 +121,14 @@ class aes128ni_t {
 	__m128i key_schedule[20];
 
 public:
+	aes128ni_t() {}
+
 	aes128ni_t(const void* key) {
-		init((const uint8_t*)key);
+		init(key);
 	}
 
 	// Инициализация ключа
-	void init(const uint8_t* key) {
+	void init(const void* key) {
 		aes128ni_load_key(key, key_schedule);
 	}
 
@@ -181,12 +183,10 @@ public:
 			prev = _mm_xor_si128(*p, prev);
 			*p = prev;
 		}
-		encrypt(buf, size);
 	}
 
 	// Расшифровка данных XOR с предыдущим
 	void xor_decrypt(void* buf, size_t size) {
-		decrypt(buf, size);
 		assert((size % 16) == 0); // Размер должен быть кратен 16
 		__m128i prev = { 0 }, *end = ((__m128i *)buf) + size / 16;
 		for (__m128i *p = (__m128i *)buf; p < end; p++) {
