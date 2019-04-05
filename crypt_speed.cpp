@@ -32,7 +32,7 @@ class msg_t : public lite_msg_t {
 	}
 
 public:
-	size_t shift; // Для выравнивания адреса data
+	//size_t shift; // Для выравнивания адреса data
 	uint8_t data[MSG_SIZE];
 
 	msg_t() {

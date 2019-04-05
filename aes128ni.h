@@ -153,26 +153,24 @@ public:
 	// Шифрование блока размером кратно 16 байт c CBC
 	void cbc_encrypt(void *buffer, size_t size) {
 		assert((size % sizeof(__m128i)) == 0); // Размер должен быть кратен 16
-		assert(((size_t)buffer % sizeof(__m128i)) == 0); // Адрес должен быть кратен 16
 		__m128i *end = ((__m128i *)buffer) + size / sizeof(__m128i);
 		__m128i prev = { 0 };
 		for (__m128i *p = (__m128i *)buffer; p < end; p++) {
-			__m128i v = _mm_xor_si128(*p, prev);
+			__m128i v = _mm_xor_si128(_mm_loadu_si128(p), prev);
 			aes128ni_enc(key_schedule, &v, p);
-			prev = *p;
+			prev = _mm_loadu_si128(p);
 		}
 	}
 
 	// Расшифровка блока размером кратно 16 байт c CBC
 	void cbc_decrypt(void *buffer, size_t size) {
 		assert((size % sizeof(__m128i)) == 0); // Размер должен быть кратен 16
-		assert(((size_t)buffer % sizeof(__m128i)) == 0); // Адрес должен быть кратен 16
 		__m128i *end = ((__m128i *)buffer) + size / sizeof(__m128i);
 		__m128i prev = { 0 };
 		for (__m128i *p = (__m128i *)buffer; p < end; p++) {
-			__m128i v, b = *p;
+			__m128i v, b = _mm_loadu_si128(p);
 			aes128ni_dec(key_schedule, p, &v);
-			*p = _mm_xor_si128(v, prev);
+			_mm_storeu_si128(p, _mm_xor_si128(v, prev));
 			prev = b;
 		}
 	}
