@@ -180,7 +180,7 @@ class aes_cbc_encrypt_t : public base_actor_t {
 	aes128ni_t aes;
 
 	msg_t* work(msg_t* msg) override {
-		aes.cbc_encrypt(msg->data, MSG_SIZE);
+		aes.cbc_encrypt(msg->data, sizeof(msg->data));
 		return msg;
 	}
 
