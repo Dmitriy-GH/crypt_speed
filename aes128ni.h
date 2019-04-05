@@ -153,6 +153,7 @@ public:
 	// Шифрование блока размером кратно 16 байт c CBC
 	void cbc_encrypt(void *buffer, size_t size) {
 		assert((size % sizeof(__m128i)) == 0); // Размер должен быть кратен 16
+		assert(((size_t)buffer % sizeof(__m128i)) == 0); // Адрес должен быть кратен 16
 		__m128i *end = ((__m128i *)buffer) + size / sizeof(__m128i);
 		__m128i prev = { 0 };
 		for (__m128i *p = (__m128i *)buffer; p < end; p++) {
@@ -164,8 +165,9 @@ public:
 
 	// Расшифровка блока размером кратно 16 байт c CBC
 	void cbc_decrypt(void *buffer, size_t size) {
-		assert((size % 16) == 0); // Размер должен быть кратен 16
-		__m128i *end = ((__m128i *)buffer) + size / 16;
+		assert((size % sizeof(__m128i)) == 0); // Размер должен быть кратен 16
+		assert(((size_t)buffer % sizeof(__m128i)) == 0); // Адрес должен быть кратен 16
+		__m128i *end = ((__m128i *)buffer) + size / sizeof(__m128i);
 		__m128i prev = { 0 };
 		for (__m128i *p = (__m128i *)buffer; p < end; p++) {
 			__m128i v, b = *p;

@@ -32,6 +32,7 @@ class msg_t : public lite_msg_t {
 	}
 
 public:
+	size_t shift; // Для выравнивания адреса data
 	uint8_t data[MSG_SIZE];
 
 	msg_t() {
@@ -175,6 +176,21 @@ public:
 	}
 };
 
+// Расшифровка AES-128
+class aes_decrypt_t : public base_actor_t {
+	aes128ni_t aes;
+
+	msg_t* work(msg_t* msg) override {
+		aes.decrypt(msg->data, MSG_SIZE);
+		return msg;
+	}
+
+public:
+	aes_decrypt_t() {
+		aes.init("My secret key...");
+	}
+};
+
 // Шифрование AES-128 + CBC
 class aes_cbc_encrypt_t : public base_actor_t {
 	aes128ni_t aes;
@@ -251,6 +267,7 @@ int main() {
 		return 1;
 	}
 	test("AES-128 encrypt", new aes_encrypt_t());
+	test("AES-128 decrypt", new aes_decrypt_t());
 	test("AES-128 + CBC encrypt", new aes_cbc_encrypt_t());
 	test("AES-128 + CBC decrypt", new aes_cbc_decrypt_t());
 }
