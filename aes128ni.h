@@ -134,8 +134,8 @@ public:
 
 	// Шифрование блока размером кратно 16 байт
 	void encrypt(void *buffer, size_t size) {
-		assert((size % 16) == 0); // Размер должен быть кратен 16
-		__m128i *end = ((__m128i *)buffer) + size / 16;
+		assert((size % sizeof(__m128i)) == 0); // Размер должен быть кратен 16
+		__m128i *end = ((__m128i *)buffer) + size / sizeof(__m128i);
 		for (__m128i *p = (__m128i *)buffer; p < end; p++) {
 			aes128ni_enc(key_schedule, p, p);
 		}
@@ -143,8 +143,8 @@ public:
 
 	// Расшифровка блока размером кратно 16 байт
 	void decrypt(void *buffer, size_t size) {
-		assert((size % 16) == 0); // Размер должен быть кратен 16
-		__m128i *end = ((__m128i *)buffer) + size/16;
+		assert((size % sizeof(__m128i)) == 0); // Размер должен быть кратен 16
+		__m128i *end = ((__m128i *)buffer) + size / sizeof(__m128i);
 		for (__m128i *p = (__m128i *)buffer; p < end; p++) {
 			aes128ni_dec(key_schedule, p, p);
 		}
@@ -177,21 +177,22 @@ public:
 
 	// Шифрование данных XOR с предыдущим
 	void xor_encrypt(void* buf, size_t size) {
-		assert((size % 16) == 0); // Размер должен быть кратен 16
-		__m128i prev = {0}, *end = ((__m128i *)buf) + size / 16;
+		assert((size % sizeof(__m128i)) == 0); // Размер должен быть кратен 16
+		__m128i prev = {0}, *end = ((__m128i *)buf) + size / sizeof(__m128i);
 		for (__m128i *p = (__m128i *)buf; p < end; p++) {
-			prev = _mm_xor_si128(*p, prev);
-			*p = prev;
+			prev = _mm_xor_si128(_mm_loadu_si128(p), prev);
+			_mm_storeu_si128(p, prev);
 		}
 	}
 
 	// Расшифровка данных XOR с предыдущим
 	void xor_decrypt(void* buf, size_t size) {
 		assert((size % 16) == 0); // Размер должен быть кратен 16
-		__m128i prev = { 0 }, *end = ((__m128i *)buf) + size / 16;
+		__m128i prev = { 0 }, *end = ((__m128i *)buf) + size / sizeof(__m128i);
 		for (__m128i *p = (__m128i *)buf; p < end; p++) {
-			__m128i b = *p;
-			prev = _mm_xor_si128(*p, prev);
+			__m128i b = _mm_loadu_si128(p);
+			prev = _mm_xor_si128(_mm_loadu_si128(p), prev);
+			_mm_storeu_si128(p, prev);
 			prev = b;
 		}
 	}

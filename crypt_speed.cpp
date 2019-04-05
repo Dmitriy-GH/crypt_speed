@@ -32,7 +32,6 @@ class msg_t : public lite_msg_t {
 	}
 
 public:
-	//size_t shift; // Для выравнивания адреса data
 	uint8_t data[MSG_SIZE];
 
 	msg_t() {
@@ -161,6 +160,26 @@ public:
 	}
 };
 
+// Шифрование RC4
+class rc4_crypt_t : public base_actor_t {
+	rc4_t rc4;
+
+	msg_t* work(msg_t* msg) override {
+		rc4.crypt(msg->data, MSG_SIZE); // Заполнение ключевой последовательности
+		return msg;
+	}
+
+public:
+	void init_key(const void* password, size_t pass_size) {
+		md5_t md5;
+		rc4.init(md5.calc(password, pass_size), 16); // Инициализация ключевой последовательности
+	}
+
+	rc4_crypt_t() {
+		init_key("My secret key", 13);
+	}
+};
+
 // Шифрование AES-128
 class aes_encrypt_t : public base_actor_t {
 	aes128ni_t aes;
@@ -221,25 +240,24 @@ public:
 	}
 };
 
-// Расшифровка AES-128 + XOR
-class aes_xor_encrypt_t : public base_actor_t {
+// Шифрование XOR128 + CBC
+class aes_xor128_cbc_encrypt_t : public base_actor_t {
 	aes128ni_t aes;
 
 	msg_t* work(msg_t* msg) override {
 		aes.xor_encrypt(msg->data, MSG_SIZE);
-		//aes.cbc_encrypt(msg->data, MSG_SIZE);
 		return msg;
 	}
 
 public:
-	aes_xor_encrypt_t() {
-		aes.init("My secret key");
+	aes_xor128_cbc_encrypt_t() {
+		aes.init("My secret key...");
 	}
 };
 
 
-// Расшифровка AES-128 + XOR
-class aes_xor_decrypt_t : public base_actor_t {
+// Расшифровка XOR128 + CBC
+class aes_xor128_cbc_decrypt_t : public base_actor_t {
 	aes128ni_t aes;
 
 	msg_t* work(msg_t* msg) override {
@@ -248,8 +266,8 @@ class aes_xor_decrypt_t : public base_actor_t {
 	}
 
 public:
-	aes_xor_decrypt_t() {
-		aes.init("My secret key");
+	aes_xor128_cbc_decrypt_t() {
+		aes.init("My secret key...");
 	}
 };
 
@@ -261,6 +279,7 @@ int main() {
 	test("send to next", new empty_t());
 	test("XOR SHIFT crypt", new xor_shift_t());
 	test("XOR SHIFT + CBC encrypt", new cbc_xor_encrypt_t());
+	test("RC4 crypt", new rc4_crypt_t());
 	
 	if (!aes128ni_is_supported()) {
 		printf("CPU not supported AES\n");
@@ -270,4 +289,6 @@ int main() {
 	test("AES-128 decrypt", new aes_decrypt_t());
 	test("AES-128 + CBC encrypt", new aes_cbc_encrypt_t());
 	test("AES-128 + CBC decrypt", new aes_cbc_decrypt_t());
+	test("XOR128 + CBC encrypt", new aes_xor128_cbc_encrypt_t());
+	test("XOR128 + CBC decrypt", new aes_xor128_cbc_decrypt_t());
 }
