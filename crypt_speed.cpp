@@ -171,7 +171,7 @@ class aes_encrypt_t : public base_actor_t {
 
 public:
 	aes_encrypt_t() {
-		aes.init("My secret key");
+		aes.init("My secret key...");
 	}
 };
 
@@ -186,7 +186,7 @@ class aes_cbc_encrypt_t : public base_actor_t {
 
 public:
 	aes_cbc_encrypt_t() {
-		aes.init("My secret key");
+		aes.init("My secret key...");
 	}
 };
 
@@ -201,7 +201,7 @@ class aes_cbc_decrypt_t : public base_actor_t {
 
 public:
 	aes_cbc_decrypt_t() {
-		aes.init("My secret key");
+		aes.init("My secret key...");
 	}
 };
 
