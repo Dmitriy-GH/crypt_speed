@@ -718,7 +718,7 @@ public:
 		if (lock) mtx.unlock(); // Снятие блокировки
 
 		#ifdef LT_DEBUG
-		if(msg != NULL) msg->next = NULL;
+		if(msg != NULL) msg->lite_msg_next = NULL;
 		#endif
 		#ifdef LT_STAT_QUEUE
 		if (msg != NULL) size--;
